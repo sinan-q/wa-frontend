@@ -41,21 +41,16 @@ const Login = () => {
             console.log(JSON.stringify(response?.data));
             //console.log(JSON.stringify(response));
             const accessToken = response?.data?.accessToken;
-            const roles = response?.data?.roles;
-            setAuth({ user, pwd, roles, accessToken });
+            setAuth({ user, accessToken });
             setUser('');
             setPwd('');
             navigate(from, { replace: true });
         } catch (err) {
             if (!err?.response) {
                 setErrMsg('No Server Response');
-            } else if (err.response?.status === 400) {
-                setErrMsg('Missing Username or Password');
-            } else if (err.response?.status === 401) {
-                setErrMsg('Unauthorized');
-            } else {
-                setErrMsg('Login Failed');
-            }
+            } else
+                setErrMsg(err.response?.data?.message || 'Unknown Error');
+            
             errRef.current.focus();
         }
     }
@@ -72,44 +67,50 @@ const Login = () => {
 
         <section>
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
-            <h1>Sign In</h1>
-            <form onSubmit={handleSubmit}>
-                <label htmlFor="username">Username:</label>
-                <input
-                    type="text"
-                    id="username"
-                    ref={userRef}
-                    autoComplete="off"
-                    onChange={(e) => setUser(e.target.value)}
-                    value={user}
-                    required
-                />
+            <div className='text-3xl text-center'>Sign In</div>
+            <form className='flex pb-4 flex-col' onSubmit={handleSubmit}>
+                <label className='mt-3' for="username">Phone Number:</label>
+                <div className='border border-black'>
+                    <label for='username' className=' p-2  inline mr-2'>+91</label>
+                    <input
+                        className='p-1'
+                        type="text"
+                        id="username"
+                        ref={userRef}
+                        autoComplete="off"
+                        onChange={(e) => setUser(e.target.value)}
+                        value={user}
+                        required
+                    />  
+                </div>
 
-                <label htmlFor="password">Password:</label>
+                
+
+                <label className='mt-3' htmlFor="password">Password:</label>
                 <input
+                    className='p-1 border border-black'
                     type="password"
                     id="password"
                     onChange={(e) => setPwd(e.target.value)}
                     value={pwd}
                     required
                 />
-                <button>Sign In</button>
+                <button className=' mt-4  p-2 bg-black text-white hover:bg-white hover:text-black border hover:border-black'>Sign In</button>
                 <div className="persistCheck">
                     <input
+                        className=' h-4 w-4 mb-0.5 mr-1 text-red-500'
                         type="checkbox"
                         id="persist"
                         onChange={togglePersist}
                         checked={persist}
                     />
-                    <label htmlFor="persist">Trust This Device</label>
+                    <label className=' align-middle hover:text-gray-500 ' htmlFor="persist">Trust This Device</label>
                 </div>
             </form>
-            <p>
-                Need an Account?<br />
-                <span className="line">
-                    <Link to="/register">Sign Up</Link>
-                </span>
-            </p>
+                
+                <div className="line  hover:text-gray-500">
+                    <Link to="/register">Need an Account? Sign Up</Link>
+                </div>
         </section>
 
     )
