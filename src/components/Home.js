@@ -2,12 +2,16 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import useLogout from '../hooks/useLogout'
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
+import Validate from "./helpers/Validate";
+import toast from "react-simple-toasts";
 
 const Home = () => {
     const navigate = useNavigate();
     const logout = useLogout();
     const [status, setStatus] = useState('')
     const [message, setMessage] = useState('')
+    const [number, setNumber] = useState("")
+
     const axiosPrivate = useAxiosPrivate();
 
     const signOut = async () => {
@@ -37,14 +41,16 @@ const Home = () => {
         }
     }
     const sendWA = async () => {
-        try {
-            const response = await axiosPrivate.post('/wa/send',JSON.stringify({ message }), {
+        const validate = Validate(number, "phonenumber");
+        if(!validate.result) toast(validate.error)
+        else try {
+            const response = await axiosPrivate.post('/wa/send',JSON.stringify({ message, phoneNumber: "91"+number }), {
                 withCredentials: true,
             });
-            // getStatus()
-            console.log(message)
+            toast(response.data.message)
         } catch (err) {
-            console.error(err);      
+            toast(err.response?.data?.message || err.message)
+  
         }
     }
 
@@ -72,27 +78,30 @@ const Home = () => {
         
 
     return (
-        <section>
+        <div>
             {status === 0 && <div className="flexGrow">
                 <button onClick={startWA}>Connect Whatsapp</button>
             </div>}
             {status === 2 && <div className="flexGrow">
-                <textarea
-                    type="textarea"
-                    id="username"
+                <input
+                    type="number"
+                    id="phoneNumber"
                     autoComplete="off"
+                    onChange={(e) => setNumber(e.target.value)}
+                    value={number}
+                    required />
+                <textarea
                     onChange={(e) => setMessage(e.target.value)}
                     value={message}
                     required>
                 </textarea>
-                <button onClick={sendWA}>Sent Message</button>
+                <button onClick={sendWA}>Sent</button>
                 <button onClick={stopWA}>Stop</button>
             </div>}
-            {status}
             <div className="flexGrow">
                 <button onClick={signOut}>Sign Out</button>
             </div>
-        </section>
+        </div>
     )
 }
 
