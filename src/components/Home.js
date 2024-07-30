@@ -4,6 +4,7 @@ import useLogout from '../hooks/useLogout'
 import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import Validate from "./helpers/Validate";
 import toast from "react-simple-toasts";
+import QRCode from "react-qr-code";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -11,6 +12,7 @@ const Home = () => {
     const [status, setStatus] = useState('')
     const [message, setMessage] = useState('')
     const [number, setNumber] = useState("")
+    const [qr, setQr] = useState('')
 
     const axiosPrivate = useAxiosPrivate();
 
@@ -24,6 +26,7 @@ const Home = () => {
                 withCredentials: true,
             });
             setStatus(response.data.message)
+            setQr(response.data.qr)
         } catch (err) {
                 console.error(err);
                 //navigate('/login', { state: { from: location }, replace: true });
@@ -35,8 +38,11 @@ const Home = () => {
             const response = await axiosPrivate.post('/wa/logout', {
                 withCredentials: true,
             });
-            getStatus()
+            toast(response.data.message)
+            setTimeout(getStatus, 2000);
         } catch (err) {
+            toast(err.response.data.message)
+
             console.error(err);      
         }
     }
@@ -60,7 +66,7 @@ const Home = () => {
                 withCredentials: true,
             });
             toast(response.data.message)
-            getStatus()
+            setTimeout(getStatus, 2000);
         } catch (err) {
             console.error(err);      
         }
@@ -84,7 +90,12 @@ const Home = () => {
 
             {status === 0 && <div className="">
                 <button className="mt-8 text-center w-full bg-black hover:bg-white hover:text-black border hover:border-black p-2 px-4 text-white  " onClick={startWA}>Connect Whatsapp</button>
+                <button className=" mt-10 border p-2 text-center w-full hover:bg-red-400 hover:text-white " onClick={stopWA}>Stop</button>
+
             </div>}
+            {status === 1 && qr && <div>
+                <QRCode value={qr} />
+                </div>}
             {status === 2 && <div className=" p-2 flex flex-col">
                 <label className='mt-3'htmlFor="phoneNumber">Sender Phone Number:</label>
                 <div className='border border-black'>
