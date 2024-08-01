@@ -24,17 +24,30 @@ const Home = () => {
     }
     const getStatus = async () => {
         try {
-            const response = await axios.get('/wa/status', {
-                withCredentials: true,
+            const response = axiosPrivate.get('/wa/status', {
                 headers: {
                     'Accept': 'text/event-stream'
                 },
                 responseType: 'stream',
                 adapter: 'fetch'
+            }).then(async (response) => {
+                console.log("got response")
+                const stream = response.data;
+
+                const decoder = new TextDecoderStream();
+                const reader = stream.pipeThrough(decoder).getReader();
+
+                while (true) {
+                    const { value, done } = await reader.read();
+                    console.log(value)
+
+                    const status = JSON.parse(value)
+                    if (done) break;
+                    setStatus(status.data)
+                    setQr(status.qr)
+                }
             });
-            console.log(JSON.stringify(response))
-            //setStatus(response.data.message)
-            //setQr(response.data.qr)
+
         } catch (err) {
                 console.error(err);
                 //navigate('/login', { state: { from: location }, replace: true });
@@ -112,9 +125,9 @@ const Home = () => {
                 <QRCode value={qr} />
                 </div>}
             {status === 2 && <div className=" p-2 flex flex-col">
-                <label className='mt-3'htmlFor="phoneNumber">Sender Phone Number:</label>
+                <label className='mt-3' htmlFor="phoneNumber">Sender Phone Number:</label>
                 <div className='border border-black'>
-                    <label for='username' className=' p-2  inline mr-2'>+91</label>
+                    <label htmlFor='username' className=' p-2  inline mr-2'>+91</label>
                     <input
                         className='p-1 w-60'
                         type="number"
