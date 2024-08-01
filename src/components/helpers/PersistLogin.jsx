@@ -14,6 +14,7 @@ const PersistLogin = () => {
 
         const verifyRefreshToken = async () => {
             try {
+                console.log("fas")
                 await refresh();
             }
             catch (err) {

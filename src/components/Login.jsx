@@ -69,9 +69,9 @@ const Login = () => {
             <p ref={errRef} className={errMsg ? "errmsg" : "offscreen"} aria-live="assertive">{errMsg}</p>
             <div className='text-3xl text-center'>Sign In</div>
             <form className='flex pb-4 flex-col' onSubmit={handleSubmit}>
-                <label className='mt-3' for="username">Phone Number:</label>
+                <label className='mt-3' htmlFor="username">Phone Number:</label>
                 <div className='border border-black'>
-                    <label for='username' className=' p-2  inline mr-2'>+91</label>
+                    <label htmlFor='username' className=' p-2  inline mr-2'>+91</label>
                     <input
                         className='p-1'
                         type="text"

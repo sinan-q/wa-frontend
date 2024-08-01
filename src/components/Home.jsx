@@ -5,6 +5,7 @@ import useAxiosPrivate from "../hooks/useAxiosPrivate";
 import Validate from "./helpers/Validate";
 import toast from "react-simple-toasts";
 import QRCode from "react-qr-code";
+import axios from "../api/axios";
 
 const Home = () => {
     const navigate = useNavigate();
@@ -18,15 +19,22 @@ const Home = () => {
 
     const signOut = async () => {
         await logout();
+        setTimeout(getStatus, 2000);
         navigate('/login');
     }
     const getStatus = async () => {
         try {
-            const response = await axiosPrivate.get('/wa/status', {
+            const response = await axios.get('/wa/status', {
                 withCredentials: true,
+                headers: {
+                    'Accept': 'text/event-stream'
+                },
+                responseType: 'stream',
+                adapter: 'fetch'
             });
-            setStatus(response.data.message)
-            setQr(response.data.qr)
+            console.log(JSON.stringify(response))
+            //setStatus(response.data.message)
+            //setQr(response.data.qr)
         } catch (err) {
                 console.error(err);
                 //navigate('/login', { state: { from: location }, replace: true });
@@ -34,6 +42,19 @@ const Home = () => {
         }
     }
     const stopWA = async () => {
+        try {
+            const response = await axiosPrivate.post('/wa/stop', {
+                withCredentials: true,
+            });
+            toast(response.data.message)
+            getStatus()
+        } catch (err) {
+            toast(err.response.data.message)
+
+            console.error(err);      
+        }
+    }
+    const logoutWA = async () => {
         try {
             const response = await axiosPrivate.post('/wa/logout', {
                 withCredentials: true,
@@ -66,19 +87,13 @@ const Home = () => {
                 withCredentials: true,
             });
             toast(response.data.message)
-            setTimeout(getStatus, 2000);
+            setTimeout(getStatus, 4000);
         } catch (err) {
             console.error(err);      
         }
     }
     useEffect(() => {
-        
         getStatus()
-        const interval = setInterval(() => {
-            getStatus()
-        }, 30000);
-
-        return ()=> clearInterval(interval)
     }, [])
 
     
